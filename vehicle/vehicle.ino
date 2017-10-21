@@ -28,16 +28,15 @@
 #define TSK_FORWARD  2 // 10
 #define TSK_BACK     3 // 11
 
-byte scratchByte;
 bool driveL;
 byte speedL;
 bool driveR;
 byte speedR;
+byte scratchByte;
 byte inputBuffer[SIZE_OF_TASK];
 unsigned long runTime; //milliseconds
 QueueList <MotorTask> taskQueue;
-MotorTask bufferTask;   
-MotorTask currentTask;
+MotorTask scratchTask;
 MotorTask stopTask(B01010000, B00000000, B00000000); // task that stops the motors
 DMDriver driver(DIR1, PWM1, DIR2, PWM2);
 
@@ -45,6 +44,11 @@ void purgeTasks(){
   while (!taskQueue.isEmpty()){
     taskQueue.pop();
   }
+}
+
+bool driveToBool(byte driveX){ // converts drive data from byte to bool (true=forward, false=back)
+  if (driveX == TSK_FORWARD) { return true; }
+    else { return false; }
 }
 
 void setup() {
@@ -57,67 +61,46 @@ void setup() {
 void loop() {
   if (Serial.available() >= SIZE_OF_TASK) { // download task from navigation
     Serial.readBytes(inputBuffer, SIZE_OF_TASK);
-//    Serial.print("inputBuffer ");
-//    Serial.print(inputBuffer[0], BIN);
-//    Serial.print(".");
-//    Serial.print(inputBuffer[1], BIN);
-//    Serial.print(".");
-//    Serial.println(inputBuffer[2], BIN);
-    bufferTask.setTask(inputBuffer[0], inputBuffer[1], inputBuffer[2]);
-//    Serial.print("bufferTask ");
-//    Serial.print(bufferTask.getDriveL(), BIN);
-//    Serial.print(".");
-//    Serial.print(bufferTask.getSpeedL(), BIN);
-//    Serial.print(".");
-//    Serial.print(bufferTask.getDriveR(), BIN);
-//    Serial.print(".");
-//    Serial.print(bufferTask.getSpeedR(), BIN);
-//    Serial.print(".");
-//    Serial.println(bufferTask.getRunTime());
-    scratchByte = bufferTask.getDriveL();
+    scratchTask.setTask(inputBuffer[0], inputBuffer[1], inputBuffer[2]);
+    scratchByte = scratchTask.getDriveL();
     if (scratchByte == TSK_CEASE){ // does the latest task contain TSK_CEASE?
       purgeTasks();
       runTime = 0;
     }else{
-      taskQueue.push(bufferTask);
+      taskQueue.push(scratchTask);
     }
   }
 
   if (millis() >= runTime){ // check if current task is complete
-    if (taskQueue.isEmpty()){
-      taskQueue.push(stopTask);
-    }
-    currentTask = taskQueue.pop();
-    runTime = currentTask.getRunTime();
+    if (taskQueue.isEmpty()){ taskQueue.push(stopTask); }
+    scratchTask = taskQueue.pop();
+    runTime = scratchTask.getRunTime();
     runTime += millis(); // offset by current time to get end time
-
-    if   (currentTask.getDriveL() == TSK_FORWARD) { driveL = true; }
-    else { driveL = false; }
-    speedL = map(currentTask.getSpeedL(), 0, 15, 0, 255);
-    if   (currentTask.getDriveR() == TSK_FORWARD) { driveR = true; }
-    else { driveR = false; }
-    speedR = map(currentTask.getSpeedR(), 0, 15, 0, 255);
+    driveL = driveToBool(scratchTask.getDriveL());
+    speedL = map(scratchTask.getSpeedL(), 0, 15, 0, 255);
+    driveR = driveToBool(scratchTask.getDriveR());
+    speedR = map(scratchTask.getSpeedR(), 0, 15, 0, 255);
     driver.run(driveL, speedL, driveR, speedR);
   }
 
-//  scratchByte = currentTask.getDriveL();
-//  Serial.print("driveL: ");
-//  Serial.println(scratchByte, BIN);
-//  scratchByte = currentTask.getDriveR();
-//  Serial.print("driveR: ");
-//  Serial.println(scratchByte, BIN);
-//  scratchByte = currentTask.getSpeedL();
-//  Serial.print("speedL: ");
-//  Serial.println(scratchByte, BIN);
-//  scratchByte = currentTask.getSpeedR();
-//  Serial.print("speedR: ");
-//  Serial.println(scratchByte, BIN);
-//  Serial.print("runTime: ");
-//  Serial.println(runTime, DEC);
-//  Serial.print("current time: ");
-//  Serial.print(millis());
-//  Serial.println(" ms");
-//  Serial.println("-");
-//  delay(3000);
+  scratchByte = scratchTask.getDriveL();
+  Serial.print("driveL: ");
+  Serial.println(scratchByte, BIN);
+  scratchByte = scratchTask.getDriveR();
+  Serial.print("driveR: ");
+  Serial.println(scratchByte, BIN);
+  scratchByte = scratchTask.getSpeedL();
+  Serial.print("speedL: ");
+  Serial.println(scratchByte, BIN);
+  scratchByte = scratchTask.getSpeedR();
+  Serial.print("speedR: ");
+  Serial.println(scratchByte, BIN);
+  Serial.print("runTime: ");
+  Serial.println(runTime, DEC);
+  Serial.print("current time: ");
+  Serial.print(millis());
+  Serial.println(" ms");
+  Serial.println("-");
+  delay(3000);
 }
 
