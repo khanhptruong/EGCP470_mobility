@@ -25,14 +25,16 @@ void MotorTask::parse(byte topByte, byte midByte, byte botByte){
 	_driveR = topByte & B00110000;
 	_driveR >>= 4;
 
-	if (_driveL != STOP) { _speedL = topByte & B00001111; }
-	else { _speedL = 0; }
+	if (_driveL != STOP) { 
+		_speedL = topByte & B00001111; 
+		_speedL = map(_speedL, 0, 15, 0, 255);
+	} else { _speedL = 0; }
 
 	if (_driveR != STOP) {
 		_speedR = midByte & B11110000;
 		_speedR >>= 4;
-	}
-	else { _speedR = 0; }
+		_speedR = map(_speedR, 0, 15, 0, 255);
+	} else { _speedR = 0; }
 
 	_runTime = midByte & B00001111;
 	_runTime <<= 8;

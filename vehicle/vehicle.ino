@@ -28,10 +28,6 @@
 #define TSK_FORWARD  2 // 10
 #define TSK_BACK     3 // 11
 
-bool driveL;
-byte speedL;
-bool driveR;
-byte speedR;
 byte scratchByte;
 byte inputBuffer[SIZE_OF_TASK];
 unsigned long runTime; //milliseconds
@@ -76,11 +72,10 @@ void loop() {
     scratchTask = taskQueue.pop();
     runTime = scratchTask.getRunTime();
     runTime += millis(); // offset by current time to get end time
-    driveL = driveToBool(scratchTask.getDriveL());
-    speedL = map(scratchTask.getSpeedL(), 0, 15, 0, 255);
-    driveR = driveToBool(scratchTask.getDriveR());
-    speedR = map(scratchTask.getSpeedR(), 0, 15, 0, 255);
-    driver.run(driveL, speedL, driveR, speedR);
+    driver.run(driveToBool(scratchTask.getDriveL()), 
+               scratchTask.getSpeedL(), 
+               driveToBool(scratchTask.getDriveR()), 
+               scratchTask.getSpeedR());
   }
 
   scratchByte = scratchTask.getDriveL();
@@ -91,10 +86,10 @@ void loop() {
   Serial.println(scratchByte, BIN);
   scratchByte = scratchTask.getSpeedL();
   Serial.print("speedL: ");
-  Serial.println(scratchByte, BIN);
+  Serial.println(scratchByte);
   scratchByte = scratchTask.getSpeedR();
   Serial.print("speedR: ");
-  Serial.println(scratchByte, BIN);
+  Serial.println(scratchByte);
   Serial.print("runTime: ");
   Serial.println(runTime, DEC);
   Serial.print("current time: ");
