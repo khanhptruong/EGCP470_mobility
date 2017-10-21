@@ -1,0 +1,25 @@
+#######################################
+# Syntax Coloring Map for motorTask
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+MotorTask	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+setTask	KEYWORD2
+getDriveL	KEYWORD2
+getSpeedL	KEYWORD2
+getDriveR	KEYWORD2
+getSpeedR	KEYWORD2
+getRunTime	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
