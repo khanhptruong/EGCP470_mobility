@@ -28,8 +28,7 @@
 #define TSK_FORWARD  2 // 10
 #define TSK_BACK     3 // 11
 
-byte scratchByte;
-byte inputBuffer[SIZE_OF_TASK];
+byte scratchByte[SIZE_OF_TASK];
 unsigned long runTime; //milliseconds
 QueueList <MotorTask> taskQueue;
 MotorTask scratchTask;
@@ -56,10 +55,9 @@ void setup() {
 
 void loop() {
   if (Serial.available() >= SIZE_OF_TASK) { // download task from navigation
-    Serial.readBytes(inputBuffer, SIZE_OF_TASK);
-    scratchTask.setTask(inputBuffer[0], inputBuffer[1], inputBuffer[2]);
-    scratchByte = scratchTask.getDriveL();
-    if (scratchByte == TSK_CEASE){ // does the latest task contain TSK_CEASE?
+    Serial.readBytes(scratchByte, SIZE_OF_TASK);
+    scratchTask.setTask(scratchByte[0], scratchByte[1], scratchByte[2]);
+    if (scratchTask.getDriveL() == TSK_CEASE){ // does the latest task contain TSK_CEASE?
       purgeTasks();
       runTime = 0;
     }else{
@@ -78,18 +76,18 @@ void loop() {
                scratchTask.getSpeedR());
   }
 
-  scratchByte = scratchTask.getDriveL();
+  scratchByte[0] = scratchTask.getDriveL();
   Serial.print("driveL: ");
-  Serial.println(scratchByte, BIN);
-  scratchByte = scratchTask.getDriveR();
+  Serial.println(scratchByte[0], BIN);
+  scratchByte[0] = scratchTask.getDriveR();
   Serial.print("driveR: ");
-  Serial.println(scratchByte, BIN);
-  scratchByte = scratchTask.getSpeedL();
+  Serial.println(scratchByte[0], BIN);
+  scratchByte[0] = scratchTask.getSpeedL();
   Serial.print("speedL: ");
-  Serial.println(scratchByte);
-  scratchByte = scratchTask.getSpeedR();
+  Serial.println(scratchByte[0]);
+  scratchByte[0] = scratchTask.getSpeedR();
   Serial.print("speedR: ");
-  Serial.println(scratchByte);
+  Serial.println(scratchByte[0]);
   Serial.print("runTime: ");
   Serial.println(runTime, DEC);
   Serial.print("current time: ");
