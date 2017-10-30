@@ -28,6 +28,7 @@
 #define TSK_FORWARD  2 // 10
 #define TSK_BACK     3 // 11
 
+bool isCease = false
 byte scratchByte;
 byte inputBuffer[SIZE_OF_TASK];
 unsigned long runTime; //milliseconds
@@ -54,17 +55,24 @@ void setup() {
   Serial.println("<Farmbot... ACTIVATED.>");
 }
 
-void loop() {
-  if (Serial.available() >= SIZE_OF_TASK) { // download task from navigation
+void serialEvent() {
+   if (Serial.available() >= SIZE_OF_TASK) { // download task from navigation
     Serial.readBytes(inputBuffer, SIZE_OF_TASK);
     scratchTask.setTask(inputBuffer[0], inputBuffer[1], inputBuffer[2]);
     scratchByte = scratchTask.getDriveL();
     if (scratchByte == TSK_CEASE){ // does the latest task contain TSK_CEASE?
-      purgeTasks();
-      runTime = 0;
+      isCease = true;
     }else{
       taskQueue.push(scratchTask);
     }
+  }
+}
+
+void loop() {
+  if (isCease){ // does the latest task contain TSK_CEASE?
+    purgeTasks();
+    runTime = 0;
+    isCease = false;
   }
 
   if (millis() >= runTime){ // check if current task is complete
